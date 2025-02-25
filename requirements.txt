@@ -1,1 +1,15 @@
 streamlit>=1.26.0
+streamlit
+pandas
+numpy
+re
+matplotlib.pyplot
+mpl_toolkits.mplot3d
+sklearn.model_selection
+sklearn.preprocessing
+sklearn.linear_model
+sklearn.neighbors
+sklearn.tree import
+mlxtend.plotting 
+sklearn.metrics
+warnings
