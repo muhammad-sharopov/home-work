@@ -58,7 +58,7 @@ def load_and_preprocess_data():
     data_neg = data_neg.fillna(data_neg.mean())
     data = pd.concat([data_pos, data_neg]).sort_index()
 
-    all_features = data.columns.tolist()
+    all_features = column_names
     return data
 
 data = load_and_preprocess_data()
