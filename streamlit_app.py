@@ -14,7 +14,7 @@ from sklearn.metrics import roc_curve, roc_auc_score
 import warnings
 warnings.filterwarnings("ignore")
 
-# Загрузка и предобработка данных
+# Загрузка и предобработка данных (с кэшированием)
 @st.cache_data
 def load_and_preprocess_data():
     pattern = re.compile(r'^(?!\|)(.+?):')
@@ -81,7 +81,7 @@ X_train_2, X_test_2, y_train, y_test = train_test_split(X_2, y, test_size=0.3, r
 X_train_2_scaled = scaler.fit_transform(X_train_2)
 X_test_2_scaled = scaler.transform(X_test_2)
 
-# Обучение моделей (вне Streamlit)
+# Обучение моделей (вне Streamlit, с кэшированием)
 @st.cache_resource
 def train_models(X_train, y_train):
     models = {
@@ -149,6 +149,7 @@ ax.plot([0, 1], [0, 1], color='gray', linestyle='--', lw=2)
 ax.set_title('ROC Curves for Classifiers', fontsize=16)
 ax.set_xlabel('False Positive Rate', fontsize=12)
 ax.set_ylabel('True Positive Rate', fontsize=12)
+
 ax.legend(loc='lower right', fontsize=12)
 
 ax.grid(True)
@@ -161,3 +162,42 @@ data = {
 }
 auc_df = pd.DataFrame(data)
 st.dataframe(auc_df)
+
+# Input Features (Sidebar)
+with st.sidebar:
+    st.header('Input Features')
+    input_data = {}  # Словарь для хранения введенных пользователем данных
+    for feature in features:  # Динамически создаем поля ввода для каждого признака
+        if data[feature].dtype == 'int64' or data[feature].dtype == 'float64':  # Числовые признаки
+            min_val = data[feature].min()
+            max_val = data[feature].max()
+            input_data[feature] = st.slider(feature, min_val, max_val, data[feature].mean())
+        else:  # Категориальные признаки (если есть)
+            unique_vals = data[feature].unique()
+            input_data[feature] = st.selectbox(feature, unique_vals)
+
+    if st.button('Predict'):  # Кнопка для запуска предсказания
+        input_df = pd.DataFrame([input_data])
+        # Масштабирование входных данных
+        input_scaled = scaler.transform(input_df[features])
+
+        # Предсказание
+        best_model_name = auc_df.loc[auc_df['AUC (test)'].idxmax(), 'Classifier']  # Получаем имя лучшей модели
+        best_model = models[best_model_name]  # Получаем лучшую модель
+        prediction = best_model.predict(input_scaled)
+        prediction_proba = best_model.predict_proba(input_scaled)
+
+        # Display Prediction
+        st.subheader('Predicted Spam')
+        st.success(f"Predicted class: **{prediction[0]}**")
+
+        # Display Probabilities
+        proba_df = pd.DataFrame(prediction_proba, columns=best_model.classes_)
+        st.dataframe(
+            proba_df,
+            column_config={
+                col: st.column_config.ProgressColumn(col, format='%f', min_value=0, max_value=1)
+                for col in proba_df.columns
+            },
+            hide_index=True
+        )
