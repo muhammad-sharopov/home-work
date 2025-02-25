@@ -166,17 +166,23 @@ st.dataframe(auc_df)
 # Input Features (Sidebar)
 with st.sidebar:
     st.header('Input Features')
-    input_data = {}  # Словарь для хранения введенных пользователем данных
-    for feature in features:  # Динамически создаем поля ввода для каждого признака
-        if data[feature].dtype == 'int64' or data[feature].dtype == 'float64':  # Числовые признаки
-            min_val = data[feature].min()
-            max_val = data[feature].max()
-            input_data[feature] = st.slider(feature, min_val, max_val, data[feature].mean())
-        else:  # Категориальные признаки (если есть)
-            unique_vals = data[feature].unique()
-            input_data[feature] = st.selectbox(feature, unique_vals)
+    input_data = {}
+    for feature in all_features: # <- Используем all_features здесь
+        if data[feature].dtype == 'int64' or data[feature].dtype == 'float64':
+            if feature in data.columns: # <- Проверяем, есть ли признак в data
+                min_val = data[feature].min()
+                max_val = data[feature].max()
+                input_data[feature] = st.slider(feature, min_val, max_val, data[feature].mean())
+            else: # <- Если признака нет в data, используем значения по умолчанию
+                input_data[feature] = st.slider(feature, 0, 100, 50) # или другие значения по умолчанию
+        else:
+            if feature in data.columns: # <- Проверяем, есть ли признак в data
+                unique_vals = data[feature].unique()
+                input_data[feature] = st.selectbox(feature, unique_vals)
+            else: # <- Если признака нет в data, устанавливаем значение по умолчанию
+                input_data[feature] = st.selectbox(feature, ["value1", "value2"]) # или другие значения по умолчанию
 
-    if st.button('Predict'):  # Кнопка для запуска предсказания
+    if st.button('Predict'):
         input_df = pd.DataFrame([input_data])
         # Масштабирование входных данных
         input_scaled = scaler.transform(input_df[features])
