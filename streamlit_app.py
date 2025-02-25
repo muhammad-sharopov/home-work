@@ -14,9 +14,11 @@ from sklearn.metrics import roc_curve, roc_auc_score
 import warnings
 warnings.filterwarnings("ignore")
 
+all_features = []
 # Загрузка и предобработка данных (с кэшированием)
 @st.cache_data
 def load_and_preprocess_data():
+    global all_features 
     pattern = re.compile(r'^(?!\|)(.+?):')
     column_names = []
     with open("spambase.names", "r") as file:
@@ -56,6 +58,7 @@ def load_and_preprocess_data():
     data_neg = data_neg.fillna(data_neg.mean())
     data = pd.concat([data_pos, data_neg]).sort_index()
 
+    all_features = data.columns.tolist()
     return data
 
 data = load_and_preprocess_data()
