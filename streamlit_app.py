@@ -10,9 +10,11 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import roc_curve, roc_auc_score
+from sklearn.metrics import roc_curve, roc_auc_score, classification_report
 from mlxtend.plotting import plot_decision_regions
 import warnings
+import plotly.express as px
+
 warnings.filterwarnings("ignore")
 
 st.title("Spambase Dataset Analysis")
@@ -126,21 +128,11 @@ knn = KNeighborsClassifier(n_neighbors=5)
 knn.fit(X_train_2_scaled, y_train)
 y_pred_knn = knn.predict(X_test_2_scaled)
 
-roc_auc_log_reg_train = roc_auc_score(y_train, log_reg_2.predict_proba(X_train_2_scaled)[:, 1])
-roc_auc_log_reg_test = roc_auc_score(y_test, log_reg_2.predict_proba(X_test_2_scaled)[:, 1])
-
-roc_auc_dt_train = roc_auc_score(y_train, decision_tree_2.predict_proba(X_train_2_scaled)[:, 1])
-roc_auc_dt_test = roc_auc_score(y_test, decision_tree_2.predict_proba(X_test_2_scaled)[:, 1])
-
-roc_auc_knn_train = roc_auc_score(y_train, knn.predict_proba(X_train_2_scaled)[:, 1])
-roc_auc_knn_test = roc_auc_score(y_test, knn.predict_proba(X_test_2_scaled)[:, 1])
-
-
 st.subheader("Model Performance")
 data = {
     'Classifier': ['Logistic Regression', 'Decision Tree', 'KNN'],
-    'AUC (train)': [roc_auc_log_reg_train, roc_auc_dt_train, roc_auc_knn_train],
-    'AUC (test)': [roc_auc_log_reg_test, roc_auc_dt_test, roc_auc_knn_test]
+    'AUC (train)': [roc_auc_score(y_train, y_pred_log_reg_2), roc_auc_score(y_train, y_pred_dt_2), roc_auc_score(y_train, y_pred_knn)],
+    'AUC (test)': [roc_auc_score(y_test, y_pred_log_reg_2), roc_auc_score(y_test, y_pred_dt_2), roc_auc_score(y_test, y_pred_knn)]
 }
 auc_df = pd.DataFrame(data)
 st.write(auc_df)
