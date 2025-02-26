@@ -77,4 +77,3 @@ plt.ylabel('True Positive Rate')
 plt.title('ROC Curves')
 plt.legend()
 st.pyplot(plt)
-о
