@@ -10,15 +10,15 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from mlxtend.plotting import plot_decision_regions
 from sklearn.metrics import roc_curve, roc_auc_score
-import warnings
 import streamlit as st
+import warnings
 
-# Suppress warnings
 warnings.filterwarnings("ignore")
 
-# Read column names from 'spambase.names'
+# Чтение данных и установка имен колонок
 pattern = re.compile(r'^(?!\|)(.+?):')
 column_names = []
+
 with open("spambase.names", "r") as file:
     for line in file:
         line = line.strip()
@@ -31,136 +31,115 @@ with open("spambase.names", "r") as file:
 if "spam" not in column_names:
     column_names.append("spam")
 
-# Read data
 data = pd.read_csv("spambase.data", delimiter=',', header=None, names=column_names)
 
-# Display a sample of the data
-st.write(data.sample(10, random_state=42))
-st.write(f"Unique values per column: {data.nunique()}")
-st.write(f"Shape of the dataset: {data.shape}")
-st.write(f"Dataset description: {data.describe()}")
+# Streamlit: Отображаем уникальные значения
+st.subheader("Уникальные значения")
+st.write(data.nunique())
 
-# Remove rows with missing target 'spam'
+# Описание данных
+st.subheader("Описание данных")
+st.write(data.describe())
+
+# Убираем строки с пропусками
 data = data.dropna(subset=["spam"])
 
-# Binary classification
+# Преобразуем бинарные классы
 unique_classes = data['spam'].unique()
 if len(unique_classes) > 2:
-    st.write("Original class distribution:")
-    st.write(data['spam'].value_counts())
     threshold = np.median(data['spam'])
     data['binary_label'] = (data['spam'] > threshold).astype(int)
-    st.write("\nDistribution after merging into binary classification:")
-    st.write(data['binary_label'].value_counts())
-else:
-    st.write("Binary classification is already present.")
 
-# Make the 'spam' column binary
-major_class = data['spam'].value_counts().idxmax()
-data['spam'] = (data['spam'] == major_class).astype(int)
-st.write(f"Final spam distribution: {data['spam'].value_counts()}")
-
-# Convert object columns to numeric
+# Обрабатываем числовые данные
 numeric_columns = data.columns[data.dtypes == 'object']
 for col in numeric_columns:
     data[col] = pd.to_numeric(data[col], errors='coerce')
 
-# Select numeric columns only
 data = data.select_dtypes(include=['number'])
 
-# Handle missing values
+# Разделяем данные по классам
 data_pos = data[data["spam"] == 1]
 data_neg = data[data["spam"] == 0]
+
+# Заполняем пропуски средними значениями
 data_pos = data_pos.fillna(data_pos.mean())
 data_neg = data_neg.fillna(data_neg.mean())
+
 data = pd.concat([data_pos, data_neg]).sort_index()
 
-# Split data into features and target
+# Отбираем нужные признаки
 target = 'spam'
 features = [i for i in data.columns if i != target]
 X = data[features]
 y = data[target]
 
-# Feature selection based on correlation with target
-features_up_10_unique = X.loc[:, X.nunique() > 10]
-correlations = features_up_10_unique.corrwith(y).abs()
+# Определяем топ 3 признаков
+correlations = X.corrwith(y).abs()
 top_features = correlations.nlargest(3)
 features_to_plot = top_features.index
 
-# 3D Visualization
 X_top = data[features_to_plot]
+
+# 3D график
+st.subheader('3D График данных')
 fig = plt.figure(figsize=(12, 12))
 ax = fig.add_subplot(111, projection='3d')
-ax.scatter(X[y == 1][features_to_plot[0]], X[y == 1][features_to_plot[1]], X[y == 1][features_to_plot[2]], c='r', marker='o', label='Spam')
-ax.scatter(X[y == 0][features_to_plot[0]], X[y == 0][features_to_plot[1]], X[y == 0][features_to_plot[2]], c='g', marker='^', label='Not Spam')
+
+ax.scatter(X_top[y == 1][features_to_plot[0]], X_top[y == 1][features_to_plot[1]], X_top[y == 1][features_to_plot[2]],
+           c='r', marker='o', label='Spam')
+ax.scatter(X_top[y == 0][features_to_plot[0]], X_top[y == 0][features_to_plot[1]], X_top[y == 0][features_to_plot[2]],
+           c='g', marker='^', label='Not Spam')
+
 ax.set_xlabel(features_to_plot[0])
 ax.set_ylabel(features_to_plot[1])
 ax.set_zlabel(features_to_plot[2])
+
 ax.set_title('Spambase Dataset - 3D Visualization')
+
 ax.legend()
 st.pyplot(fig)
 
-# Train-test split and scaling
+# Разделение данных на обучающую и тестовую выборки
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# Select top 2 features
-top_2_features = top_features.head(2).index
-X_2 = data[top_2_features]
-
-# Train-test split for top 2 features
-X_train_2, X_test_2, y_train, y_test = train_test_split(X_2, y, test_size=0.3, random_state=42)
-X_train_2_scaled = scaler.fit_transform(X_train_2)
-X_test_2_scaled = scaler.transform(X_test_2)
-
-# Initialize models
-knn_2 = KNeighborsClassifier(n_neighbors=3)
-log_reg_2 = LogisticRegression(max_iter=565)
-decision_tree_2 = DecisionTreeClassifier(max_depth=5)
-
-# Fit models
-knn_2.fit(X_train_2_scaled, y_train)
-log_reg_2.fit(X_train_2_scaled, y_train)
-decision_tree_2.fit(X_train_2_scaled, y_train)
-
-# Make predictions
-y_prob_knn_2 = knn_2.predict_proba(X_test_2_scaled)[:, 1]
-y_prob_log_reg_2 = log_reg_2.predict_proba(X_test_2_scaled)[:, 1]
-y_prob_dt_2 = decision_tree_2.predict_proba(X_test_2_scaled)[:, 1]
-
-# ROC AUC scores
-roc_auc_knn_2 = roc_auc_score(y_test, y_prob_knn_2)
-roc_auc_log_reg_2 = roc_auc_score(y_test, y_prob_log_reg_2)
-roc_auc_dt_2 = roc_auc_score(y_test, y_prob_dt_2)
-
-# Display ROC AUC scores
-st.write(f'KNN AUC: {roc_auc_knn_2}')
-st.write(f'Logistic Regression AUC: {roc_auc_log_reg_2}')
-st.write(f'Decision Tree AUC: {roc_auc_dt_2}')
-
-# ROC Curves
-fpr_knn_2, tpr_knn_2, _ = roc_curve(y_test, y_prob_knn_2)
-fpr_log_reg_2, tpr_log_reg_2, _ = roc_curve(y_test, y_prob_log_reg_2)
-fpr_dt_2, tpr_dt_2, _ = roc_curve(y_test, y_prob_dt_2)
-
-fig_roc = plt.figure(figsize=(10, 8))
-plt.plot(fpr_knn_2, tpr_knn_2, color='blue', lw=2, label=f'KNN (AUC = {roc_auc_knn_2:.2f})')
-plt.plot(fpr_log_reg_2, tpr_log_reg_2, color='green', lw=2, label=f'Logistic Regression (AUC = {roc_auc_log_reg_2:.2f})')
-plt.plot(fpr_dt_2, tpr_dt_2, color='red', lw=2, label=f'Decision Tree (AUC = {roc_auc_dt_2:.2f})')
-plt.plot([0, 1], [0, 1], color='gray', linestyle='--', lw=2)
-plt.title('ROC Curves for Classifiers', fontsize=16)
-plt.xlabel('False Positive Rate', fontsize=12)
-plt.ylabel('True Positive Rate', fontsize=12)
-plt.legend(loc='lower right', fontsize=12)
-plt.grid(True)
-st.pyplot(fig_roc)
-
-# AUC Table
-auc_data = {
-    'Classifier': ['KNN', 'Logistic Regression', 'Decision Tree'],
-    'AUC (test)': [roc_auc_knn_2, roc_auc_log_reg_2, roc_auc_dt_2]
+# Модели для обучения
+models = {
+    "Logistic Regression": LogisticRegression(max_iter=565),
+    "KNN": KNeighborsClassifier(),
+    "Decision Tree": DecisionTreeClassifier(max_depth=5)
 }
-auc_df = pd.DataFrame(auc_data)
-st.write(auc_df)
+
+# Обучаем модели и отображаем графики решений
+st.subheader('Графики решений для моделей')
+
+for name, model in models.items():
+    model.fit(X_train_scaled, y_train)
+    fig2 = plt.figure(figsize=(15, 5))
+    plot_decision_regions(X_train_scaled, y_train.values, clf=model, legend=2)
+    plt.title(f'{name} Decision Region')
+    plt.xlabel(features_to_plot[0])
+    plt.ylabel(features_to_plot[1])
+    plt.tight_layout()
+    st.pyplot(fig2)
+
+    # Предсказания и оценка AUC
+    y_pred = model.predict(X_test_scaled)
+    y_prob = model.predict_proba(X_test_scaled)[:, 1]
+    fpr, tpr, _ = roc_curve(y_test, y_prob)
+    roc_auc = roc_auc_score(y_test, y_prob)
+
+    st.subheader(f'ROC Кривая для {name}')
+    fig3 = plt.figure(figsize=(10, 8))
+    plt.plot(fpr, tpr, lw=2, label=f'{name} (AUC = {roc_auc:.2f})')
+    plt.plot([0, 1], [0, 1], color='gray', linestyle='--', lw=2)
+    plt.title(f'ROC Curve for {name}')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.legend(loc='lower right')
+    plt.grid(True)
+    st.pyplot(fig3)
+
+    st.write(f'{name} AUC: {roc_auc:.2f}')
