@@ -10,15 +10,17 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import roc_curve, roc_auc_score, classification_report, confusion_matrix
+from sklearn.metrics import roc_curve, roc_auc_score, classification_report
 from mlxtend.plotting import plot_decision_regions
-import plotly.graph_objects as go
-import joblib
+from sklearn.decomposition import PCA
+import warnings
+import plotly.express as px
 
-# Заголовок приложения Streamlit
+warnings.filterwarnings("ignore")
+
 st.title("Spambase Dataset Analysis")
 
-# Загрузка данных и подготовка колонок
+# Load dataset and prepare the data
 pattern = re.compile(r'^(?!\|)(.+?):')
 column_names = []
 
@@ -36,24 +38,19 @@ if "spam" not in column_names:
 
 data = pd.read_csv("spambase.data", delimiter=',', header=None, names=column_names)
 
-# Отображение данных
 st.subheader("Sample Data")
 st.write(data.sample(10, random_state=42))
 
-# Описание данных
 st.subheader("Unique Values and Shape")
 st.write("Number of unique values per column:")
 st.write(data.nunique())
 st.write("Shape of the dataset:", data.shape)
 
-# Описание статистики
 st.subheader("Data Description")
 st.write(data.describe())
 
-# Удаление пустых значений
 data = data.dropna(subset=["spam"])
 
-# Бинаризация классов
 unique_classes = data['spam'].unique()
 if len(unique_classes) > 2:
     threshold = np.median(data['spam'])
@@ -63,20 +60,17 @@ if len(unique_classes) > 2:
 else:
     st.write("Binarization not needed.")
 
-# Финальная переработка классов
 major_class = data['spam'].value_counts().idxmax()
 data['spam'] = (data['spam'] == major_class).astype(int)
 st.subheader("Final Spam Distribution")
 st.write(data['spam'].value_counts())
 
-# Преобразование категориальных признаков в числовые
 numeric_columns = data.columns[data.dtypes == 'object']
 for col in numeric_columns:
     data[col] = pd.to_numeric(data[col], errors='coerce')
 
 data = data.select_dtypes(include=['number'])
 
-# Обработка пропусков в данных
 data_pos = data[data["spam"] == 1]
 data_neg = data[data["spam"] == 0]
 data_pos = data_pos.fillna(data_pos.mean())
@@ -86,20 +80,17 @@ data = pd.concat([data_pos, data_neg]).sort_index()
 st.subheader("Missing Values Count")
 st.write(data.isnull().sum().sum())
 
-# Разделение на целевую переменную и признаки
 target = 'spam'
 features = [i for i in data.columns if i != target]
 X = data[features]
 y = data[target]
 
-# Корреляции признаков с целевой переменной
 features_up_10_unique = X.loc[:, X.nunique() > 10]
 correlations = features_up_10_unique.corrwith(y).abs()
 top_features = correlations.nlargest(3)
 st.subheader("Top Correlated Features")
 st.write(top_features)
 
-# Визуализация признаков
 features_to_plot = top_features.index
 X_top = data[features_to_plot]
 
@@ -116,101 +107,58 @@ ax.set_title('Spambase Dataset - 3D Visualization')
 ax.legend()
 st.pyplot(fig)
 
-# Разделение на обучающие и тестовые данные
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# Модели машинного обучения
+top_2_features = top_features.head(2).index
+X_2 = data[top_2_features]
+X_train_2, X_test_2, y_train, y_test = train_test_split(X_2, y, test_size=0.3, random_state=42)
+X_train_2_scaled = scaler.fit_transform(X_train_2)
+X_test_2_scaled = scaler.transform(X_test_2)
+
 log_reg_2 = LogisticRegression(max_iter=565)
-log_reg_2.fit(X_train_scaled, y_train)
+log_reg_2.fit(X_train_2_scaled, y_train)
+y_pred_log_reg_2 = log_reg_2.predict(X_test_2_scaled)
 
 decision_tree_2 = DecisionTreeClassifier(max_depth=5)
-decision_tree_2.fit(X_train_scaled, y_train)
+decision_tree_2.fit(X_train_2_scaled, y_train)
+y_pred_dt_2 = decision_tree_2.predict(X_test_2_scaled)
 
 knn = KNeighborsClassifier(n_neighbors=5)
-knn.fit(X_train_scaled, y_train)
+knn.fit(X_train_2_scaled, y_train)
+y_pred_knn = knn.predict(X_test_2_scaled)
 
-# Оценка качества моделей
 st.subheader("Model Performance")
 data = {
     'Classifier': ['Logistic Regression', 'Decision Tree', 'KNN'],
-    'AUC (train)': [roc_auc_score(y_train, log_reg_2.predict(X_train_scaled)),
-                     roc_auc_score(y_train, decision_tree_2.predict(X_train_scaled)),
-                     roc_auc_score(y_train, knn.predict(X_train_scaled))],
-    'AUC (test)': [roc_auc_score(y_test, log_reg_2.predict(X_test_scaled)),
-                    roc_auc_score(y_test, decision_tree_2.predict(X_test_scaled)),
-                    roc_auc_score(y_test, knn.predict(X_test_scaled))]
+    'AUC (train)': [roc_auc_score(y_train, y_pred_log_reg_2), roc_auc_score(y_train, y_pred_dt_2), roc_auc_score(y_train, y_pred_knn)],
+    'AUC (test)': [roc_auc_score(y_test, y_pred_log_reg_2), roc_auc_score(y_test, y_pred_dt_2), roc_auc_score(y_test, y_pred_knn)]
 }
 auc_df = pd.DataFrame(data)
 st.write(auc_df)
 
-# Визуализация границ решений
+st.subheader("Decision Boundaries")
+
+# Using PCA to reduce the feature space to 2 dimensions for decision boundaries
+pca = PCA(n_components=2)
+X_train_2_scaled_pca = pca.fit_transform(X_train_2_scaled)
+X_test_2_scaled_pca = pca.transform(X_test_2_scaled)
+
 model_choice = st.selectbox("Choose a model", ["Logistic Regression", "Decision Tree", "KNN"])
 if model_choice == "Logistic Regression":
     fig, ax = plt.subplots(figsize=(8, 6))
-    plot_decision_regions(X_test_scaled, y_test.values, clf=log_reg_2)
-    plt.title("Logistic Regression Decision Boundary")
+    plot_decision_regions(X_test_2_scaled_pca, y_test.values, clf=log_reg_2)
+    plt.title("Logistic Regression Decision Boundary (PCA)")
     st.pyplot(fig)
 elif model_choice == "Decision Tree":
     fig, ax = plt.subplots(figsize=(8, 6))
-    plot_decision_regions(X_test_scaled, y_test.values, clf=decision_tree_2)
-    plt.title("Decision Tree Decision Boundary")
+    plot_decision_regions(X_test_2_scaled_pca, y_test.values, clf=decision_tree_2)
+    plt.title("Decision Tree Decision Boundary (PCA)")
     st.pyplot(fig)
 elif model_choice == "KNN":
     fig, ax = plt.subplots(figsize=(8, 6))
-    plot_decision_regions(X_test_scaled, y_test.values, clf=knn)
-    plt.title("KNN Decision Boundary")
+    plot_decision_regions(X_test_2_scaled_pca, y_test.values, clf=knn)
+    plt.title("KNN Decision Boundary (PCA)")
     st.pyplot(fig)
-
-# Сохранение модели
-joblib.dump(log_reg_2, 'logistic_regression_model.pkl')
-
-# Загрузка модели
-model = joblib.load('logistic_regression_model.pkl')
-
-# Функция для отображения метрик модели
-def display_metrics(model, X_test, y_test):
-    y_pred = model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred)
-    recall = recall_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred)
-
-    st.subheader("Evaluation Metrics")
-    st.metric("Accuracy", accuracy)
-    st.metric("Precision", precision)
-    st.metric("Recall", recall)
-    st.metric("F1 Score", f1)
-
-# Оценка метрик для модели логистической регрессии
-display_metrics(log_reg_2, X_test_scaled, y_test)
-
-# Визуализация матрицы ошибок
-def plot_confusion_matrix(y_true, y_pred):
-    cm = confusion_matrix(y_true, y_pred)
-    plt.figure(figsize=(6, 5))
-    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=["Not Spam", "Spam"], yticklabels=["Not Spam", "Spam"])
-    plt.ylabel('Actual')
-    plt.xlabel('Predicted')
-    plt.title('Confusion Matrix')
-    st.pyplot(plt)
-
-# Матрица ошибок для логистической регрессии
-plot_confusion_matrix(y_test, log_reg_2.predict(X_test_scaled))
-
-# Визуализация ROC-кривой
-def plot_roc_curve(fpr, tpr, auc, model_name):
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines', name=f'{model_name} (AUC = {auc:.2f})'))
-    fig.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode='lines', line=dict(dash='dash', color='gray')))
-    fig.update_layout(title='Receiver Operating Characteristic (ROC) Curve',
-                      xaxis_title='False Positive Rate',
-                      yaxis_title='True Positive Rate')
-    st.plotly_chart(fig)
-
-# ROC для логистической регрессии
-fpr, tpr, thresholds = roc_curve(y_test, log_reg_2.predict(X_test_scaled))
-auc = roc_auc_score(y_test, log_reg_2.predict(X_test_scaled))
-plot_roc_curve(fpr, tpr, auc, 'Logistic Regression')
