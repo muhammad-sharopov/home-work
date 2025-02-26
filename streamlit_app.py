@@ -126,6 +126,16 @@ knn = KNeighborsClassifier(n_neighbors=5)
 knn.fit(X_train_2_scaled, y_train)
 y_pred_knn = knn.predict(X_test_2_scaled)
 
+roc_auc_log_reg_train = roc_auc_score(y_train, log_reg_2.predict_proba(X_train_2_scaled)[:, 1])
+roc_auc_log_reg_test = roc_auc_score(y_test, log_reg_2.predict_proba(X_test_2_scaled)[:, 1])
+
+roc_auc_dt_train = roc_auc_score(y_train, decision_tree_2.predict_proba(X_train_2_scaled)[:, 1])
+roc_auc_dt_test = roc_auc_score(y_test, decision_tree_2.predict_proba(X_test_2_scaled)[:, 1])
+
+roc_auc_knn_train = roc_auc_score(y_train, knn.predict_proba(X_train_2_scaled)[:, 1])
+roc_auc_knn_test = roc_auc_score(y_test, knn.predict_proba(X_test_2_scaled)[:, 1])
+
+
 st.subheader("Model Performance")
 data = {
     'Classifier': ['Logistic Regression', 'Decision Tree', 'KNN'],
