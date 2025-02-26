@@ -5,3 +5,4 @@ scikit-learn  # включает sklearn.tree и другие модули
 matplotlib
 mlxtend
 plotly
+seaborn
