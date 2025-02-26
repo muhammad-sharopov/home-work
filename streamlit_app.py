@@ -71,7 +71,7 @@ for name, model in models.items():
     y_prob = model.predict_proba(X_test_scaled)[:, 1]
     fpr, tpr, _ = roc_curve(y_test, y_prob)
     plt.plot(fpr, tpr, label=f'{name} (AUC = {auc_scores[name]:.2f})')
-plt.plot([0, 1], [0, 1], linestyle='--', color='gray')
+plt.plot([0, ], [0, 1], linestyle='--', color='gray')
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('ROC Curves')
