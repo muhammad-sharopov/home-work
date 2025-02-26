@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import roc_curve, roc_auc_score
 import warnings
 warnings.filterwarnings("ignore")
@@ -120,15 +121,21 @@ decision_tree_2 = DecisionTreeClassifier(max_depth=5)
 decision_tree_2.fit(X_train_2_scaled, y_train)
 y_pred_dt_2 = decision_tree_2.predict(X_test_2_scaled)
 
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train_2_scaled, y_train)
+y_pred_knn = knn.predict(X_test_2_scaled)
+
 y_prob_log_reg_test = log_reg_2.predict_proba(X_test_2_scaled)[:, 1]
 y_prob_dt_test = decision_tree_2.predict_proba(X_test_2_scaled)[:, 1]
+y_prob_knn_test = knn.predict_proba(X_test_2_scaled)[:, 1]
 
 roc_auc_log_reg_test = roc_auc_score(y_test, y_prob_log_reg_test)
 roc_auc_dt_test = roc_auc_score(y_test, y_prob_dt_test)
+roc_auc_knn_test = roc_auc_score(y_test, y_prob_knn_test)
 
 data = {
-    'Classifier': ['Logistic Regression', 'Decision Tree'],
-    'AUC (test)': [roc_auc_log_reg_test, roc_auc_dt_test]
+    'Classifier': ['Logistic Regression', 'Decision Tree', 'KNN'],
+    'AUC (test)': [roc_auc_log_reg_test, roc_auc_dt_test, roc_auc_knn_test]
 }
 auc_df = pd.DataFrame(data)
 st.subheader("Model Performance")
