@@ -126,43 +126,29 @@ knn = KNeighborsClassifier(n_neighbors=5)
 knn.fit(X_train_2_scaled, y_train)
 y_pred_knn = knn.predict(X_test_2_scaled)
 
-y_prob_log_reg_train = log_reg_2.predict_proba(X_train_2_scaled)[:, 1]
-y_prob_dt_train = decision_tree_2.predict_proba(X_train_2_scaled)[:, 1]
-y_prob_knn_train = knn.predict_proba(X_train_2_scaled)[:, 1]
-
-y_prob_log_reg_test = log_reg_2.predict_proba(X_test_2_scaled)[:, 1]
-y_prob_dt_test = decision_tree_2.predict_proba(X_test_2_scaled)[:, 1]
-y_prob_knn_test = knn.predict_proba(X_test_2_scaled)[:, 1]
-
-roc_auc_log_reg_train = roc_auc_score(y_train, y_prob_log_reg_train)
-roc_auc_dt_train = roc_auc_score(y_train, y_prob_dt_train)
-roc_auc_knn_train = roc_auc_score(y_train, y_prob_knn_train)
-
-roc_auc_log_reg_test = roc_auc_score(y_test, y_prob_log_reg_test)
-roc_auc_dt_test = roc_auc_score(y_test, y_prob_dt_test)
-roc_auc_knn_test = roc_auc_score(y_test, y_prob_knn_test)
-
+st.subheader("Model Performance")
 data = {
     'Classifier': ['Logistic Regression', 'Decision Tree', 'KNN'],
     'AUC (train)': [roc_auc_log_reg_train, roc_auc_dt_train, roc_auc_knn_train],
     'AUC (test)': [roc_auc_log_reg_test, roc_auc_dt_test, roc_auc_knn_test]
 }
 auc_df = pd.DataFrame(data)
-st.subheader("Model Performance")
 st.write(auc_df)
 
 st.subheader("Decision Boundaries")
-fig, ax = plt.subplots(figsize=(8, 6))
-plot_decision_regions(X_test_2_scaled, y_test.values, clf=log_reg_2)
-plt.title("Logistic Regression Decision Boundary")
-st.pyplot(fig)
-
-fig, ax = plt.subplots(figsize=(8, 6))
-plot_decision_regions(X_test_2_scaled, y_test.values, clf=decision_tree_2)
-plt.title("Decision Tree Decision Boundary")
-st.pyplot(fig)
-
-fig, ax = plt.subplots(figsize=(8, 6))
-plot_decision_regions(X_test_2_scaled, y_test.values, clf=knn)
-plt.title("KNN Decision Boundary")
-st.pyplot(fig)
+model_choice = st.selectbox("Choose a model", ["Logistic Regression", "Decision Tree", "KNN"])
+if model_choice == "Logistic Regression":
+    fig, ax = plt.subplots(figsize=(8, 6))
+    plot_decision_regions(X_test_2_scaled, y_test.values, clf=log_reg_2)
+    plt.title("Logistic Regression Decision Boundary")
+    st.pyplot(fig)
+elif model_choice == "Decision Tree":
+    fig, ax = plt.subplots(figsize=(8, 6))
+    plot_decision_regions(X_test_2_scaled, y_test.values, clf=decision_tree_2)
+    plt.title("Decision Tree Decision Boundary")
+    st.pyplot(fig)
+elif model_choice == "KNN":
+    fig, ax = plt.subplots(figsize=(8, 6))
+    plot_decision_regions(X_test_2_scaled, y_test.values, clf=knn)
+    plt.title("KNN Decision Boundary")
+    st.pyplot(fig)
