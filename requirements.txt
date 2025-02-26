@@ -6,3 +6,4 @@ matplotlib
 mlxtend
 plotly
 seaborn
+joblib
