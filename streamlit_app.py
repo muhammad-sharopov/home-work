@@ -4,17 +4,15 @@ import re
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
-from mpl_toolkits.mplot3d import Axes3D
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import roc_curve, roc_auc_score, classification_report
+from sklearn.metrics import roc_auc_score
 from mlxtend.plotting import plot_decision_regions
 from sklearn.decomposition import PCA
 import warnings
-import plotly.express as px
 
 warnings.filterwarnings("ignore")
 
@@ -51,114 +49,71 @@ st.write(data.describe())
 
 data = data.dropna(subset=["spam"])
 
-unique_classes = data['spam'].unique()
-if len(unique_classes) > 2:
-    threshold = np.median(data['spam'])
-    data['binary_label'] = (data['spam'] > threshold).astype(int)
-    st.subheader("Class Distribution After Binarization")
-    st.write(data['binary_label'].value_counts())
-else:
-    st.write("Binarization not needed.")
-
-major_class = data['spam'].value_counts().idxmax()
-data['spam'] = (data['spam'] == major_class).astype(int)
-st.subheader("Final Spam Distribution")
-st.write(data['spam'].value_counts())
-
-numeric_columns = data.columns[data.dtypes == 'object']
-for col in numeric_columns:
-    data[col] = pd.to_numeric(data[col], errors='coerce')
-
-data = data.select_dtypes(include=['number'])
-
-data_pos = data[data["spam"] == 1]
-data_neg = data[data["spam"] == 0]
-data_pos = data_pos.fillna(data_pos.mean())
-data_neg = data_neg.fillna(data_neg.mean())
-data = pd.concat([data_pos, data_neg]).sort_index()
-
-st.subheader("Missing Values Count")
-st.write(data.isnull().sum().sum())
-
+# Final data preparation
 target = 'spam'
 features = [i for i in data.columns if i != target]
 X = data[features]
 y = data[target]
 
-features_up_10_unique = X.loc[:, X.nunique() > 10]
-correlations = features_up_10_unique.corrwith(y).abs()
-top_features = correlations.nlargest(3)
-st.subheader("Top Correlated Features")
-st.write(top_features)
-
-features_to_plot = top_features.index
-X_top = data[features_to_plot]
-
-fig = plt.figure(figsize=(12, 12))
-ax = fig.add_subplot(111, projection='3d')
-ax.scatter(X[y == 1][features_to_plot[0]], X[y == 1][features_to_plot[1]], X[y == 1][features_to_plot[2]],
-           c='r', marker='o', label='Spam')
-ax.scatter(X[y == 0][features_to_plot[0]], X[y == 0][features_to_plot[1]], X[y == 0][features_to_plot[2]],
-           c='g', marker='^', label='Not Spam')
-ax.set_xlabel(features_to_plot[0])
-ax.set_ylabel(features_to_plot[1])
-ax.set_zlabel(features_to_plot[2])
-ax.set_title('Spambase Dataset - 3D Visualization')
-ax.legend()
-st.pyplot(fig)
-
+# Split data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Scaling the data
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-top_2_features = top_features.head(2).index
-X_2 = data[top_2_features]
-X_train_2, X_test_2, y_train, y_test = train_test_split(X_2, y, test_size=0.3, random_state=42)
-X_train_2_scaled = scaler.fit_transform(X_train_2)
-X_test_2_scaled = scaler.transform(X_test_2)
+# Logistic Regression Model
+log_reg_2 = LogisticRegression(max_iter=1000)
+log_reg_2.fit(X_train_scaled, y_train)
 
-log_reg_2 = LogisticRegression(max_iter=565)
-log_reg_2.fit(X_train_2_scaled, y_train)
-y_pred_log_reg_2 = log_reg_2.predict(X_test_2_scaled)
-
+# Decision Tree Model
 decision_tree_2 = DecisionTreeClassifier(max_depth=5)
-decision_tree_2.fit(X_train_2_scaled, y_train)
-y_pred_dt_2 = decision_tree_2.predict(X_test_2_scaled)
+decision_tree_2.fit(X_train_scaled, y_train)
 
+# KNN Model
 knn = KNeighborsClassifier(n_neighbors=5)
-knn.fit(X_train_2_scaled, y_train)
-y_pred_knn = knn.predict(X_test_2_scaled)
+knn.fit(X_train_scaled, y_train)
 
+# Predictions
+y_pred_log_reg_2 = log_reg_2.predict(X_test_scaled)
+y_pred_dt_2 = decision_tree_2.predict(X_test_scaled)
+y_pred_knn = knn.predict(X_test_scaled)
+
+# AUC Scores
 st.subheader("Model Performance")
 data = {
     'Classifier': ['Logistic Regression', 'Decision Tree', 'KNN'],
-    'AUC (train)': [roc_auc_score(y_train, y_pred_log_reg_2), roc_auc_score(y_train, y_pred_dt_2), roc_auc_score(y_train, y_pred_knn)],
-    'AUC (test)': [roc_auc_score(y_test, y_pred_log_reg_2), roc_auc_score(y_test, y_pred_dt_2), roc_auc_score(y_test, y_pred_knn)]
+    'AUC (train)': [roc_auc_score(y_train, log_reg_2.predict(X_train_scaled)), 
+                    roc_auc_score(y_train, decision_tree_2.predict(X_train_scaled)),
+                    roc_auc_score(y_train, knn.predict(X_train_scaled))],
+    'AUC (test)': [roc_auc_score(y_test, y_pred_log_reg_2), 
+                   roc_auc_score(y_test, y_pred_dt_2), 
+                   roc_auc_score(y_test, y_pred_knn)]
 }
 auc_df = pd.DataFrame(data)
 st.write(auc_df)
 
-st.subheader("Decision Boundaries")
-
-# Using PCA to reduce the feature space to 2 dimensions for decision boundaries
+# PCA for decision boundaries (reduce to 2D)
 pca = PCA(n_components=2)
-X_train_2_scaled_pca = pca.fit_transform(X_train_2_scaled)
-X_test_2_scaled_pca = pca.transform(X_test_2_scaled)
+X_train_2d = pca.fit_transform(X_train_scaled)
+X_test_2d = pca.transform(X_test_scaled)
 
+# Model selection for decision boundary plot
 model_choice = st.selectbox("Choose a model", ["Logistic Regression", "Decision Tree", "KNN"])
+
 if model_choice == "Logistic Regression":
     fig, ax = plt.subplots(figsize=(8, 6))
-    plot_decision_regions(X_test_2_scaled_pca, y_test.values, clf=log_reg_2)
+    plot_decision_regions(X_test_2d, y_test.values, clf=log_reg_2)
     plt.title("Logistic Regression Decision Boundary (PCA)")
     st.pyplot(fig)
 elif model_choice == "Decision Tree":
     fig, ax = plt.subplots(figsize=(8, 6))
-    plot_decision_regions(X_test_2_scaled_pca, y_test.values, clf=decision_tree_2)
+    plot_decision_regions(X_test_2d, y_test.values, clf=decision_tree_2)
     plt.title("Decision Tree Decision Boundary (PCA)")
     st.pyplot(fig)
 elif model_choice == "KNN":
     fig, ax = plt.subplots(figsize=(8, 6))
-    plot_decision_regions(X_test_2_scaled_pca, y_test.values, clf=knn)
+    plot_decision_regions(X_test_2d, y_test.values, clf=knn)
     plt.title("KNN Decision Boundary (PCA)")
     st.pyplot(fig)
