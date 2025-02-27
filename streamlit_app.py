@@ -282,7 +282,7 @@ model_dict = {
     "KNN": knn
 }
 top_feature = correlations.nlargest(3)
-top_2_features = top_feature.head(2).index
+top_2_features = top_feature.head(2).index.tolist()
 X_2 = data[top_2_features]
 X_train_2, X_test_2, y_train, y_test = train_test_split(X_2, y, test_size=0.3, random_state=42)
 X_train_2_scaled = scaler.fit_transform(X_train_2)
