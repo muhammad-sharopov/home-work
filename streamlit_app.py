@@ -281,7 +281,7 @@ model_dict = {
     "Decision Tree": decision_tree_2,
     "KNN": knn
 }
-
+'''
 features_up_10_unique1 = X.loc[:, X.nunique() > 10]
 correlations1 = features_up_10_unique1.corrwith(y).abs()
 topfeatures = correlations1.nlargest(2)
@@ -289,13 +289,13 @@ top_2_feature = topfeatures.index
 X_2 = data[top_2_feature]
 X_train_2, X_test_2, y_train, y_test = train_test_split(X_2, y, test_size=0.3, random_state=42)
 X_train_2_scaled = scaler.fit_transform(X_train_2)
-X_test_2_scaled = scaler.transform(X_test_2)
+X_test_2_scaled = scaler.transform(X_test_2)'''
 
 if selected_model:
     model = model_dict[selected_model]
     
-    x_min, x_max = X_test_2_scaled[:, 0].min() - 1, X_test_2_scaled[:, 0].max() + 1
-    y_min, y_max = X_test_2_scaled[:, 1].min() - 1, X_test_2_scaled[:, 1].max() + 1
+    x_min, x_max = X_test_scaled[:, 0].min() - 1, X_test_scaled[:, 0].max() + 1
+    y_min, y_max = X_test_scaled[:, 1].min() - 1, X_test_scaled[:, 1].max() + 1
     xx, yy = np.meshgrid(np.linspace(x_min, x_max, 100), np.linspace(y_min, y_max, 100))
     Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
     Z = Z.reshape(xx.shape)
@@ -309,8 +309,8 @@ if selected_model:
     ))
     
     fig.add_trace(go.Scatter(
-        x=X_test_2_scaled[:, 0], 
-        y=X_test_2_scaled[:, 1], 
+        x=X_test_scaled[:, 0], 
+        y=X_test_scaled[:, 1], 
         mode='markers', 
         marker=dict(color=y_test.values, colorscale='Jet', size=8),
         name="Test Data"
@@ -318,8 +318,8 @@ if selected_model:
 
     fig.update_layout(
         title=f"{selected_model} Decision Boundary",
-        xaxis_title=top_2_feature[0],
-        yaxis_title=top_2_feature[1],
+        xaxis_title=top_features[0],
+        yaxis_title=top_features[1],
         coloraxis_showscale=False
     )
 
