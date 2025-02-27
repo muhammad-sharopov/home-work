@@ -48,12 +48,16 @@ st.subheader("Unique Values and Shape")
 
 st.write("Shape of the dataset:", data.shape)
 
-selected_column = st.selectbox("Select a column to view unique values:", data.columns)
+st.subheader("Unique Values and Shape")
+
+selected_column = st.selectbox("Select a column:", data.columns)
 
 if selected_column:
     st.write(f"Number of unique values in '{selected_column}':", data[selected_column].nunique())
-    st.write("Unique values sample:")
-    st.write(data[selected_column].unique()[:10]) 
+    
+    with st.expander("Show Unique Values"):
+        st.dataframe(data[selected_column].unique())
+
 
 
 st.subheader("Data Description")
