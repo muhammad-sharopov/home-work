@@ -215,6 +215,8 @@ auc_df = pd.DataFrame(data)
 st.subheader("Model Performance")
 st.write(auc_df)
 
+st.subheader('Decision Boundary')
+
 selected_model = st.selectbox("Select a model for decision boundary:", ["Logistic Regression", "Decision Tree", "KNN"])
 
 # Словарь для соответствия названий моделей объектам
