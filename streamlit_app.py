@@ -225,7 +225,7 @@ st.plotly_chart(fig)
 
 st.sidebar.header("Number of features for models and ROС AUС:")
 
-num_features = st.sidebar.slider("Select the number of features to use", min_value=1, max_value=num_features_up_10_unique, value=2)
+num_features = st.sidebar.slider("Select the number of features to use", min_value=2, max_value=num_features_up_10_unique, value=2)
 
 top_features = correlations.nlargest(num_features).index
 X_selected = X[top_features]
