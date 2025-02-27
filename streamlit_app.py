@@ -51,11 +51,24 @@ st.subheader("Unique Values and Shape")
 selected_view = st.radio("Select data view:", ("Rows", "Columns"))
 
 if selected_view == "Rows":
+    if "show_rows" not in st.session_state:
+        st.session_state.show_rows = False
+
     if st.button("Show Rows"):
+        st.session_state.show_rows = not st.session_state.show_rows 
+
+    if st.session_state.show_rows:
         st.write("Number of rows:", data.shape[0])
-        st.dataframe(data)  
+        st.dataframe(data) 
+
 elif selected_view == "Columns":
+    if "show_columns" not in st.session_state:
+        st.session_state.show_columns = False
+
     if st.button("Show Columns"):
+        st.session_state.show_columns = not st.session_state.show_columns 
+
+    if st.session_state.show_columns:
         st.write("Number of columns:", data.shape[1])
         st.write("Column names:")
         st.write(data.columns) 
