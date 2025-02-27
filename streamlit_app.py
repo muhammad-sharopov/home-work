@@ -133,7 +133,7 @@ st.sidebar.header("Top Correlated Features:")
 
 top_n = st.sidebar.slider(
     "Select number of top correlated features:",
-    min_value=1, max_value=58, value=3, step=1
+    min_value=1, max_value=57, value=3, step=1
 )
 
 features_up_10_unique = X.loc[:, X.nunique() > 10]
@@ -221,7 +221,9 @@ fig.update_layout(
 
 st.plotly_chart(fig)
 
-num_features = st.sidebar.slider("Select the number of features to use", min_value=1, max_value=58, value=2)
+st.sidebar.header("Number of features for models and ROС AUС:")
+
+num_features = st.sidebar.slider("Select the number of features to use", min_value=1, max_value=57, value=2)
 
 top_features = correlations.nlargest(num_features).index
 X_selected = X[top_features]
