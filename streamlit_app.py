@@ -138,34 +138,59 @@ top_features = correlations.nlargest(3)
 st.subheader("Top Correlated Features")
 st.write(top_features)
 
+
 st.subheader('Spambase Dataset - 3D Visualization')
 
+# Выбор класса
 selected_class = st.radio("Select the class to display:", ("Both", "Spam", "Not Spam"))
 
+# Выбираем нужные признаки для отображения
 features_to_plot = top_features.index
 X_top = data[features_to_plot]
 
-fig = plt.figure(figsize=(12, 12))
-ax = fig.add_subplot(111, projection='3d')
-
+# Подготовка данных для отображения
 if selected_class == "Spam":
-    ax.scatter(X[y == 1][features_to_plot[0]], X[y == 1][features_to_plot[1]], X[y == 1][features_to_plot[2]],
-               c='r', marker='o', label='Spam')
+    class_data = X[y == 1]
+    class_label = "Spam"
+    marker = 'o'
+    color = 'red'
 elif selected_class == "Not Spam":
-    ax.scatter(X[y == 0][features_to_plot[0]], X[y == 0][features_to_plot[1]], X[y == 0][features_to_plot[2]],
-               c='g', marker='^', label='Not Spam')
-else:
-    ax.scatter(X[y == 1][features_to_plot[0]], X[y == 1][features_to_plot[1]], X[y == 1][features_to_plot[2]],
-               c='r', marker='o', label='Spam')
-    ax.scatter(X[y == 0][features_to_plot[0]], X[y == 0][features_to_plot[1]], X[y == 0][features_to_plot[2]],
-               c='g', marker='^', label='Not Spam')
+    class_data = X[y == 0]
+    class_label = "Not Spam"
+    marker = '^'
+    color = 'green'
+else:  # Если выбрано "Both"
+    class_data = X
+    class_label = "Both"
+    marker = ['o', '^']
+    color = ['red', 'green']
 
-ax.set_xlabel(features_to_plot[0])
-ax.set_ylabel(features_to_plot[1])
-ax.set_zlabel(features_to_plot[2])
-ax.legend()
+# Создаем 3D scatter plot с Plotly
+fig = go.Figure()
 
-st.pyplot(fig)
+# Добавляем точки для класса Spam и Not Spam (или обеих категорий)
+fig.add_trace(go.Scatter3d(
+    x=class_data[features_to_plot[0]],
+    y=class_data[features_to_plot[1]],
+    z=class_data[features_to_plot[2]],
+    mode='markers',
+    marker=dict(size=5, color=color, symbol=marker),
+    name=class_label
+))
+
+# Настройки осей и заголовков
+fig.update_layout(
+    scene=dict(
+        xaxis_title=features_to_plot[0],
+        yaxis_title=features_to_plot[1],
+        zaxis_title=features_to_plot[2]
+    ),
+    title="Spambase Dataset - 3D Visualization",
+    showlegend=True
+)
+
+# Отображаем график в Streamlit
+st.plotly_chart(fig)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 scaler = StandardScaler()
