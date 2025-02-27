@@ -283,12 +283,15 @@ model_dict = {
     "Decision Tree": decision_tree_2,
     "KNN": knn
 }
+X_train_scaled_2 = X_train_scaled[:, :2]
+X_test_scaled_2 = X_test_scaled[:, :2]
+
 
 if selected_model:
     model = model_dict[selected_model]
     
-    x_min, x_max = X_test_scaled[:, 0].min() - 1, X_test_scaled[:, 0].max() + 1
-    y_min, y_max = X_test_scaled[:, 1].min() - 1, X_test_scaled[:, 1].max() + 1
+    x_min, x_max = X_test_scaled_2[:, 0].min() - 1, X_test_scaled_2[:, 0].max() + 1
+    y_min, y_max = X_test_scaled_2[:, 1].min() - 1, X_test_scaled_2[:, 1].max() + 1
     xx, yy = np.meshgrid(np.linspace(x_min, x_max, 100), np.linspace(y_min, y_max, 100))
     Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
     Z = Z.reshape(xx.shape)
@@ -302,8 +305,8 @@ if selected_model:
     ))
     
     fig.add_trace(go.Scatter(
-        x=X_test_scaled[:, 0], 
-        y=X_test_scaled[:, 1], 
+        x=X_test_scaled_2[:, 0], 
+        y=X_test_scaled_2[:, 1], 
         mode='markers', 
         marker=dict(color=y_test.values, colorscale='Jet', size=8),
         name="Test Data"
