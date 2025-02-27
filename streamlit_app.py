@@ -221,36 +221,36 @@ fig.update_layout(
 
 st.plotly_chart(fig)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+num_features = st.sidebar.slider("Select the number of features to use", min_value=1, max_value=58, value=2)
+
+top_features = correlations.nlargest(num_features).index
+X_selected = X[top_features]
+
+X_train, X_test, y_train, y_test = train_test_split(X_selected, y, test_size=0.3, random_state=42)
+
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-top_2_features = top_features.head(2).index
-X_2 = data[top_2_features]
-X_train_2, X_test_2, y_train, y_test = train_test_split(X_2, y, test_size=0.3, random_state=42)
-X_train_2_scaled = scaler.fit_transform(X_train_2)
-X_test_2_scaled = scaler.transform(X_test_2)
-
 log_reg_2 = LogisticRegression(max_iter=565)
-log_reg_2.fit(X_train_2_scaled, y_train)
-y_pred_log_reg_2 = log_reg_2.predict(X_test_2_scaled)
+log_reg_2.fit(X_train_scaled, y_train)
+y_pred_log_reg_2 = log_reg_2.predict(X_test_scaled)
 
 decision_tree_2 = DecisionTreeClassifier(max_depth=5)
-decision_tree_2.fit(X_train_2_scaled, y_train)
-y_pred_dt_2 = decision_tree_2.predict(X_test_2_scaled)
+decision_tree_2.fit(X_train_scaled, y_train)
+y_pred_dt_2 = decision_tree_2.predict(X_test_scaled)
 
 knn = KNeighborsClassifier(n_neighbors=5)
-knn.fit(X_train_2_scaled, y_train)
-y_pred_knn = knn.predict(X_test_2_scaled)
+knn.fit(X_train_scaled, y_train)
+y_pred_knn = knn.predict(X_test_scaled)
 
-y_prob_log_reg_train = log_reg_2.predict_proba(X_train_2_scaled)[:, 1]
-y_prob_dt_train = decision_tree_2.predict_proba(X_train_2_scaled)[:, 1]
-y_prob_knn_train = knn.predict_proba(X_train_2_scaled)[:, 1]
+y_prob_log_reg_train = log_reg_2.predict_proba(X_train_scaled)[:, 1]
+y_prob_dt_train = decision_tree_2.predict_proba(X_train_scaled)[:, 1]
+y_prob_knn_train = knn.predict_proba(X_train_scaled)[:, 1]
 
-y_prob_log_reg_test = log_reg_2.predict_proba(X_test_2_scaled)[:, 1]
-y_prob_dt_test = decision_tree_2.predict_proba(X_test_2_scaled)[:, 1]
-y_prob_knn_test = knn.predict_proba(X_test_2_scaled)[:, 1]
+y_prob_log_reg_test = log_reg_2.predict_proba(X_test_scaled)[:, 1]
+y_prob_dt_test = decision_tree_2.predict_proba(X_test_scaled)[:, 1]
+y_prob_knn_test = knn.predict_proba(X_test_scaled)[:, 1]
 
 roc_auc_log_reg_train = roc_auc_score(y_train, y_prob_log_reg_train)
 roc_auc_dt_train = roc_auc_score(y_train, y_prob_dt_train)
@@ -266,6 +266,7 @@ data = {
     'AUC (test)': [roc_auc_log_reg_test, roc_auc_dt_test, roc_auc_knn_test]
 }
 auc_df = pd.DataFrame(data)
+
 st.subheader("Model Performance")
 st.write(auc_df)
 
