@@ -133,7 +133,7 @@ st.sidebar.header("Top Correlated Features:")
 
 top_n = st.sidebar.slider(
     "Select number of top correlated features:",
-    min_value=1, max_value=57, value=3, step=1
+    min_value=2, max_value=57, value=3, step=1
 )
 
 features_up_10_unique = X.loc[:, X.nunique() > 10]
@@ -282,9 +282,8 @@ model_dict = {
     "KNN": knn
 }
 
-correlation = features_up_10_unique.corrwith(y).abs()
-top_feature = correlation.nlargest(2)
-top_2_feature = top_feature.index
+
+top_2_feature = top_features.head(2).index
 X_2 = data[top_2_feature]
 X_train_2, X_test_2, y_train, y_test = train_test_split(X_2, y, test_size=0.3, random_state=42)
 X_train_2_scaled = scaler.fit_transform(X_train_2)
