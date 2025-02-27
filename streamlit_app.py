@@ -111,6 +111,8 @@ top_features = correlations.nlargest(3)
 st.subheader("Top Correlated Features")
 st.write(top_features)
 
+st.subheader('Spambase Dataset - 3D Visualization')
+
 selected_class = st.radio("Select the class to display:", ("Both", "Spam", "Not Spam"))
 
 features_to_plot = top_features.index
@@ -134,7 +136,6 @@ else:
 ax.set_xlabel(features_to_plot[0])
 ax.set_ylabel(features_to_plot[1])
 ax.set_zlabel(features_to_plot[2])
-ax.set_title('Spambase Dataset - 3D Visualization')
 ax.legend()
 
 st.pyplot(fig)
