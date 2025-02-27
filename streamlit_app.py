@@ -183,9 +183,37 @@ model_dict = {
 }
 
 if selected_model:
-    fig, ax = plt.subplots(figsize=(8, 6))
-    plot_decision_regions(X_test_2_scaled, y_test.values, clf=model_dict[selected_model])
-    plt.title(f"{selected_model} Decision Boundary")
+    model = model_dict[selected_model]
     
-    # Добавляем интерактивный график
-    st.pyplot(fig, use_container_width=True)
+    # Генерируем границы решений
+    x_min, x_max = X_test_2_scaled[:, 0].min() - 1, X_test_2_scaled[:, 0].max() + 1
+    y_min, y_max = X_test_2_scaled[:, 1].min() - 1, X_test_2_scaled[:, 1].max() + 1
+    xx, yy = np.meshgrid(np.linspace(x_min, x_max, 100), np.linspace(y_min, y_max, 100))
+    Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+    
+    # Создаем интерактивный график с Plotly
+    fig = px.imshow(Z, 
+                    origin="lower",
+                    extent=[x_min, x_max, y_min, y_max],
+                    color_continuous_scale="Viridis",
+                    opacity=0.5)
+    
+    # Добавляем точки тестовой выборки
+    fig.add_trace(go.Scatter(
+        x=X_test_2_scaled[:, 0], 
+        y=X_test_2_scaled[:, 1], 
+        mode='markers', 
+        marker=dict(color=y_test.values, colorscale='Jet', size=8),
+        name="Test Data"
+    ))
+
+    # Настройка осей
+    fig.update_layout(
+        title=f"{selected_model} Decision Boundary",
+        xaxis_title=top_2_features[0],
+        yaxis_title=top_2_features[1],
+        coloraxis_showscale=False
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
