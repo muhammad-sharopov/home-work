@@ -282,7 +282,8 @@ model_dict = {
     "KNN": knn
 }
 
-correlations1 = features_up_10_unique.corrwith(y).abs()
+features_up_10_unique1 = X.loc[:, X.nunique() > 10]
+correlations1 = features_up_10_unique1.corrwith(y).abs()
 topfeatures = correlations1.nlargest(2)
 top_2_feature = topfeatures.index
 X_2 = data[top_2_feature]
