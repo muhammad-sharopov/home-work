@@ -135,7 +135,7 @@ st.sidebar.header("Top Correlated Features:")
 
 top_n = st.sidebar.slider(
     "Select number of top correlated features:",
-    min_value=2, max_value=num_features_up_10_unique, value=3, step=1
+    min_value=3, max_value=num_features_up_10_unique, value=3, step=1
 )
 
 features_up_10_unique = X.loc[:, X.nunique() > 10]
