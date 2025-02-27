@@ -129,6 +129,8 @@ features = [i for i in data.columns if i != target]
 X = data[features]
 y = data[target]
 
+st.sidebar.header("Top Correlated Features:")
+
 top_n = st.sidebar.slider(
     "Select number of top correlated features:",
     min_value=1, max_value=58, value=3, step=1
@@ -147,7 +149,9 @@ st.write(top_features)
 
 st.subheader('Spambase Dataset - 3D Visualization')
 
-selected_class = st.sidebar.radio("Select the class to display (3D Visualisation):", ("Both", "Spam", "Not Spam"))
+st.sidebar.header("3D Visualisation:")
+
+selected_class = st.sidebar.radio("Select the class to display:", ("Both", "Spam", "Not Spam"))
 
 features_to_plot = top_features.index
 X_top = data[features_to_plot]
