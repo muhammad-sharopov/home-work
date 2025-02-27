@@ -46,7 +46,7 @@ with st.expander('Sample Data'):
     st.dataframe(y_raw)
 
 
-st.subheader("Unique Values and Shape")
+st.subheader("Shape")
 
 selected_view = st.radio("Select data view:", ("Rows", "Columns"))
 
@@ -74,6 +74,8 @@ elif selected_view == "Columns":
     if st.session_state.show_columns:
         st.write("Column names:")
         st.write(data.columns) 
+
+st.subheader("Unique Values")
 
 selected_column = st.selectbox("Select a column:", data.columns)
 
