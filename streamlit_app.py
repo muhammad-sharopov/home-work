@@ -56,7 +56,7 @@ if selected_column:
     st.write(f"Number of unique values in '{selected_column}':", data[selected_column].nunique())
     
     with st.expander("Show Unique Values"):
-        st.dataframe(data[selected_column].unique())
+        st.dataframe(sorted(data[selected_column].unique()))
 
 
 
