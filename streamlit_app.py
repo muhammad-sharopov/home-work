@@ -147,7 +147,7 @@ st.write(top_features)
 
 st.subheader('Spambase Dataset - 3D Visualization')
 
-selected_class = st.sidebar.radio("Select the class to display:", ("Both", "Spam", "Not Spam"))
+selected_class = st.sidebar.radio("Select the class to display (3D Visualisation):", ("Both", "Spam", "Not Spam"))
 
 features_to_plot = top_features.index
 X_top = data[features_to_plot]
