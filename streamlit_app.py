@@ -48,8 +48,6 @@ st.subheader("Unique Values and Shape")
 
 st.write("Shape of the dataset:", data.shape)
 
-st.subheader("Unique Values and Shape")
-
 selected_column = st.selectbox("Select a column:", data.columns)
 
 if selected_column:
@@ -78,7 +76,7 @@ if len(unique_classes) > 2:
     st.subheader("Class Distribution After Binarization")
     st.write(data['binary_label'].value_counts())
 else:
-    st.write("Binarization not needed.")
+    st.write("Binarization for target not needed.")
 
 major_class = data['spam'].value_counts().idxmax()
 data['spam'] = (data['spam'] == major_class).astype(int)
