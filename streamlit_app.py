@@ -173,18 +173,19 @@ auc_df = pd.DataFrame(data)
 st.subheader("Model Performance")
 st.write(auc_df)
 
-st.subheader("Decision Boundaries")
-fig, ax = plt.subplots(figsize=(8, 6))
-plot_decision_regions(X_test_2_scaled, y_test.values, clf=log_reg_2)
-plt.title("Logistic Regression Decision Boundary")
-st.pyplot(fig)
+selected_model = st.selectbox("Select a model for decision boundary:", ["Logistic Regression", "Decision Tree", "KNN"])
 
-fig, ax = plt.subplots(figsize=(8, 6))
-plot_decision_regions(X_test_2_scaled, y_test.values, clf=decision_tree_2)
-plt.title("Decision Tree Decision Boundary")
-st.pyplot(fig)
+# Словарь для соответствия названий моделей объектам
+model_dict = {
+    "Logistic Regression": log_reg_2,
+    "Decision Tree": decision_tree_2,
+    "KNN": knn
+}
 
-fig, ax = plt.subplots(figsize=(8, 6))
-plot_decision_regions(X_test_2_scaled, y_test.values, clf=knn)
-plt.title("KNN Decision Boundary")
-st.pyplot(fig)
+if selected_model:
+    fig, ax = plt.subplots(figsize=(8, 6))
+    plot_decision_regions(X_test_2_scaled, y_test.values, clf=model_dict[selected_model])
+    plt.title(f"{selected_model} Decision Boundary")
+    
+    # Добавляем интерактивный график
+    st.pyplot(fig, use_container_width=True)
