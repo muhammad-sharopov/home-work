@@ -146,34 +146,64 @@ features_to_plot = top_features.index
 X_top = data[features_to_plot]
 
 # Подготовка данных для отображения
-if selected_class == "Spam":
-    class_data = X[y == 1]
-    class_label = "Spam"
-    marker = 'circle'  # Используем разрешенный символ
-    color = 'red'
-elif selected_class == "Not Spam":
-    class_data = X[y == 0]
-    class_label = "Not Spam"
-    marker = 'square'  # Используем разрешенный символ
-    color = 'green'
-else:  # Если выбрано "Both"
-    class_data = X
-    class_label = "Both"
-    marker = 'circle'  # Используем разрешенный символ
-    color = 'red'
-
-# Создаем 3D scatter plot с Plotly
 fig = go.Figure()
 
-# Добавляем точки для класса Spam и Not Spam (или обеих категорий)
-fig.add_trace(go.Scatter3d(
-    x=class_data[features_to_plot[0]],
-    y=class_data[features_to_plot[1]],
-    z=class_data[features_to_plot[2]],
-    mode='markers',
-    marker=dict(size=5, color=color, symbol=marker),
-    name=class_label
-))
+if selected_class == "Spam":
+    # Данные для Spam
+    class_data = X[y == 1]
+    class_label = "Spam"
+    marker = 'circle'  # Символ для Spam
+    color = 'red'
+    # Добавляем точки
+    fig.add_trace(go.Scatter3d(
+        x=class_data[features_to_plot[0]],
+        y=class_data[features_to_plot[1]],
+        z=class_data[features_to_plot[2]],
+        mode='markers',
+        marker=dict(size=4, color=color, symbol=marker),
+        name=class_label
+    ))
+
+elif selected_class == "Not Spam":
+    # Данные для Not Spam
+    class_data = X[y == 0]
+    class_label = "Not Spam"
+    marker = 'square'  # Символ для Not Spam
+    color = 'green'
+    # Добавляем точки
+    fig.add_trace(go.Scatter3d(
+        x=class_data[features_to_plot[0]],
+        y=class_data[features_to_plot[1]],
+        z=class_data[features_to_plot[2]],
+        mode='markers',
+        marker=dict(size=4, color=color, symbol=marker),
+        name=class_label
+    ))
+
+else:  # Если выбрано "Both"
+    # Данные для обоих классов
+    spam_data = X[y == 1]
+    not_spam_data = X[y == 0]
+    
+    # Добавляем точки для Spam
+    fig.add_trace(go.Scatter3d(
+        x=spam_data[features_to_plot[0]],
+        y=spam_data[features_to_plot[1]],
+        z=spam_data[features_to_plot[2]],
+        mode='markers',
+        marker=dict(size=4, color='red', symbol='circle'),
+        name="Spam"
+    ))
+
+    # Добавляем точки для Not Spam
+    fig.add_trace(go.Scatter3d(
+        x=not_spam_data[features_to_plot[0]],
+        y=not_spam_data[features_to_plot[1]],
+        z=not_spam_data[features_to_plot[2]],
+        mode='markers',
+        marker=dict(size=4, color='green', symbol='square'),
+        name="Not Spam"
+    ))
 
 # Настройки осей и заголовков
 fig.update_layout(
