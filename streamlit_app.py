@@ -194,11 +194,13 @@ if selected_model:
     Z = Z.reshape(xx.shape)
     
     # Создаем интерактивный график с Plotly
-    fig = px.imshow(Z, 
-                    origin="lower",
-                    extent=[x_min, x_max, y_min, y_max],
-                    color_continuous_scale="Viridis",
-                    opacity=0.5)
+    fig = go.Figure(data=go.Heatmap(
+        z=Z,
+        x=np.linspace(x_min, x_max, Z.shape[1]),
+        y=np.linspace(y_min, y_max, Z.shape[0]),
+        colorscale="Viridis",
+        opacity=0.5
+    ))
     
     # Добавляем точки тестовой выборки
     fig.add_trace(go.Scatter(
