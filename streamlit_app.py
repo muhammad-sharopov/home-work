@@ -60,8 +60,8 @@ st.subheader("Data Description")
 
 selected_column = st.selectbox("Select a column to describe:", data.columns)
 
-if st.button(f"Show description for {selected_column}"):
-    st.write(data[selected_column].describe())
+st.write(data[selected_column].describe())
+
 
 
 
