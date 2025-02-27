@@ -60,7 +60,7 @@ if selected_view == "Rows":
         st.session_state.show_rows = not st.session_state.show_rows 
 
     if st.session_state.show_rows:
-        st.dataframe(data.head()) 
+        st.dataframe(data) 
 
 elif selected_view == "Columns":
     if "show_columns" not in st.session_state:
@@ -73,7 +73,7 @@ elif selected_view == "Columns":
 
     if st.session_state.show_columns:
         st.write("Column names:")
-        st.write(data.columns.tolist()) 
+        st.write(data.columns) 
 
 selected_column = st.selectbox("Select a column:", data.columns)
 
