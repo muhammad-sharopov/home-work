@@ -281,15 +281,6 @@ model_dict = {
     "Decision Tree": decision_tree_2,
     "KNN": knn
 }
-'''
-features_up_10_unique1 = X.loc[:, X.nunique() > 10]
-correlations1 = features_up_10_unique1.corrwith(y).abs()
-topfeatures = correlations1.nlargest(2)
-top_2_feature = topfeatures.index
-X_2 = data[top_2_feature]
-X_train_2, X_test_2, y_train, y_test = train_test_split(X_2, y, test_size=0.3, random_state=42)
-X_train_2_scaled = scaler.fit_transform(X_train_2)
-X_test_2_scaled = scaler.transform(X_test_2)'''
 
 if selected_model:
     model = model_dict[selected_model]
