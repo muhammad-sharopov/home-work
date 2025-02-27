@@ -111,20 +111,32 @@ top_features = correlations.nlargest(3)
 st.subheader("Top Correlated Features")
 st.write(top_features)
 
+selected_class = st.radio("Select the class to display:", ("Both", "Spam", "Not Spam"))
+
 features_to_plot = top_features.index
 X_top = data[features_to_plot]
 
 fig = plt.figure(figsize=(12, 12))
 ax = fig.add_subplot(111, projection='3d')
-ax.scatter(X[y == 1][features_to_plot[0]], X[y == 1][features_to_plot[1]], X[y == 1][features_to_plot[2]],
-           c='r', marker='o', label='Spam')
-ax.scatter(X[y == 0][features_to_plot[0]], X[y == 0][features_to_plot[1]], X[y == 0][features_to_plot[2]],
-           c='g', marker='^', label='Not Spam')
+
+if selected_class == "Spam":
+    ax.scatter(X[y == 1][features_to_plot[0]], X[y == 1][features_to_plot[1]], X[y == 1][features_to_plot[2]],
+               c='r', marker='o', label='Spam')
+elif selected_class == "Not Spam":
+    ax.scatter(X[y == 0][features_to_plot[0]], X[y == 0][features_to_plot[1]], X[y == 0][features_to_plot[2]],
+               c='g', marker='^', label='Not Spam')
+else:
+    ax.scatter(X[y == 1][features_to_plot[0]], X[y == 1][features_to_plot[1]], X[y == 1][features_to_plot[2]],
+               c='r', marker='o', label='Spam')
+    ax.scatter(X[y == 0][features_to_plot[0]], X[y == 0][features_to_plot[1]], X[y == 0][features_to_plot[2]],
+               c='g', marker='^', label='Not Spam')
+
 ax.set_xlabel(features_to_plot[0])
 ax.set_ylabel(features_to_plot[1])
 ax.set_zlabel(features_to_plot[2])
 ax.set_title('Spambase Dataset - 3D Visualization')
 ax.legend()
+
 st.pyplot(fig)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
