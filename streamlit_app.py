@@ -48,7 +48,16 @@ with st.expander('Sample Data'):
 
 st.subheader("Unique Values and Shape")
 
-st.write("Shape of the dataset:", data.shape)
+selected_view = st.radio("Select data view:", ("Rows", "Columns"))
+
+# В зависимости от выбора отображаем соответствующие данные
+if selected_view == "Rows":
+    st.write("Number of rows:", data.shape[0])
+    st.dataframe(data.head())  # Показываем первые несколько строк данных
+elif selected_view == "Columns":
+    st.write("Number of columns:", data.shape[1])
+    st.write("Column names:")
+    st.write(data.columns.tolist())  # Показываем имена всех колонок
 
 selected_column = st.selectbox("Select a column:", data.columns)
 
