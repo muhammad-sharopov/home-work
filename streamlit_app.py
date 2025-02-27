@@ -55,10 +55,14 @@ if selected_column:
     st.write("Unique values sample:")
     st.write(data[selected_column].unique()[:10]) 
 
+
 st.subheader("Data Description")
 
-if st.button("Show Data Description"):
-    st.write(data.describe())
+selected_column = st.selectbox("Select a column to describe:", data.columns)
+
+if st.button(f"Show description for {selected_column}"):
+    st.write(data[selected_column].describe())
+
 
 
 data = data.dropna(subset=["spam"])
