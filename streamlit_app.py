@@ -46,8 +46,7 @@ with st.expander('Sample Data'):
 
 st.subheader("Unique Values and Shape")
 
-if st.button("Show Dataset Shape"):
-    st.write("Shape of the dataset:", data.shape)
+st.write("Shape of the dataset:", data.shape)
 
 selected_column = st.selectbox("Select a column to view unique values:", data.columns)
 
