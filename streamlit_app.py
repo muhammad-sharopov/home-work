@@ -285,7 +285,7 @@ model_dict = {
 correlation = features_up_10_unique.corrwith(y).abs()
 top_feature = correlation.nlargest(3)
 top_2_features = top_feature.index[:2] 
-X_2 = data[top_2_features]
+X_2 = data[top_2_features.tolist()]
 X_train_2, X_test_2, y_train, y_test = train_test_split(X_2, y, test_size=0.3, random_state=42)
 X_train_2_scaled = scaler.fit_transform(X_train_2)
 X_test_2_scaled = scaler.transform(X_test_2)
