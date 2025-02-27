@@ -50,14 +50,15 @@ st.subheader("Unique Values and Shape")
 
 selected_view = st.radio("Select data view:", ("Rows", "Columns"))
 
-# В зависимости от выбора отображаем соответствующие данные
 if selected_view == "Rows":
-    st.write("Number of rows:", data.shape[0])
-    st.dataframe(data)  # Показываем первые несколько строк данных
+    if st.button("Show Rows"):
+        st.write("Number of rows:", data.shape[0])
+        st.dataframe(data)  
 elif selected_view == "Columns":
-    st.write("Number of columns:", data.shape[1])
-    st.write("Column names:")
-    st.write(data.columns.tolist())  # Показываем имена всех колонок
+    if st.button("Show Columns"):
+        st.write("Number of columns:", data.shape[1])
+        st.write("Column names:")
+        st.write(data.columns) 
 
 selected_column = st.selectbox("Select a column:", data.columns)
 
