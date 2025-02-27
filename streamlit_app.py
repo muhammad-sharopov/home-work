@@ -279,6 +279,11 @@ model_dict = {
     "Decision Tree": decision_tree_2,
     "KNN": knn
 }
+top_2_features = top_features.head(2).index
+X_2 = data[top_2_features]
+X_train_2, X_test_2, y_train, y_test = train_test_split(X_2, y, test_size=0.3, random_state=42)
+X_train_2_scaled = scaler.fit_transform(X_train_2)
+X_test_2_scaled = scaler.transform(X_test_2)
 
 if selected_model:
     model = model_dict[selected_model]
