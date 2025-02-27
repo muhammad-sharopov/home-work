@@ -53,7 +53,7 @@ selected_view = st.radio("Select data view:", ("Rows", "Columns"))
 # В зависимости от выбора отображаем соответствующие данные
 if selected_view == "Rows":
     st.write("Number of rows:", data.shape[0])
-    st.dataframe(data.head())  # Показываем первые несколько строк данных
+    st.dataframe(data)  # Показываем первые несколько строк данных
 elif selected_view == "Columns":
     st.write("Number of columns:", data.shape[1])
     st.write("Column names:")
