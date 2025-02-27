@@ -129,12 +129,19 @@ features = [i for i in data.columns if i != target]
 X = data[features]
 y = data[target]
 
-features_up_10_unique = X.loc[:, X.nunique() > 10]
-correlations = features_up_10_unique.corrwith(y).abs()
-top_features = correlations.nlargest(3)
-st.subheader("Top Correlated Features")
-st.write(top_features)
+top_n = st.sidebar.slider(
+    "Select number of top correlated features:",
+    min_value=1, max_value=58, value=3, step=1
+)
 
+features_up_10_unique = X.loc[:, X.nunique() > 10]
+
+correlations = features_up_10_unique.corrwith(y).abs()
+
+top_features = correlations.nlargest(top_n)
+
+st.subheader(f"Top {top_n} Correlated Features")
+st.write(top_features)
 
 st.subheader('Spambase Dataset - 3D Visualization')
 
