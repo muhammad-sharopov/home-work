@@ -37,11 +37,11 @@ data = pd.read_csv("spambase.data", delimiter=',', header=None, names=column_nam
 with st.expander('Sample Data'):
     st.write("Features (X)")
     X_raw = data.drop('spam', axis=1)
-    st.dataframe(X_raw.sample(10, random_state=42))
+    st.dataframe(X_raw)
 
     st.write("Target (y)")
     y_raw = data['spam']
-    st.dataframe(y_raw.sample(10, random_state=42))
+    st.dataframe(y_raw)
 
 
 st.subheader("Unique Values and Shape")
