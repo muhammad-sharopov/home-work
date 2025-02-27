@@ -47,8 +47,8 @@ with st.expander('Sample Data'):
 
 
 st.subheader("Shape")
-
-selected_view = st.radio("Select data view:", ("Rows", "Columns"))
+st.sidebar.header("SHAPE:")
+selected_view = st.sidebar.radio("Select data view:", ("Rows", "Columns"))
 
 if selected_view == "Rows":
     if "show_rows" not in st.session_state:
