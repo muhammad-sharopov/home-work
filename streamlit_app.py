@@ -45,9 +45,16 @@ with st.expander('Sample Data'):
 
 
 st.subheader("Unique Values and Shape")
-st.write("Number of unique values per column:")
-st.write(data.nunique())
-st.write("Shape of the dataset:", data.shape)
+
+if st.button("Show Dataset Shape"):
+    st.write("Shape of the dataset:", data.shape)
+
+selected_column = st.selectbox("Select a column to view unique values:", data.columns)
+
+if selected_column:
+    st.write(f"Number of unique values in '{selected_column}':", data[selected_column].nunique())
+    st.write("Unique values sample:")
+    st.write(data[selected_column].unique()[:10]) 
 
 st.subheader("Data Description")
 st.write(data.describe())
