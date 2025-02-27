@@ -143,25 +143,22 @@ top_features = correlations.nlargest(top_n)
 st.subheader(f"Top {top_n} Correlated Features")
 st.write(top_features)
 
+
+
 st.subheader('Spambase Dataset - 3D Visualization')
 
-# Выбор класса
-selected_class = st.radio("Select the class to display:", ("Both", "Spam", "Not Spam"))
+selected_class = st.sidebar.radio("Select the class to display:", ("Both", "Spam", "Not Spam"))
 
-# Выбираем нужные признаки для отображения
 features_to_plot = top_features.index
 X_top = data[features_to_plot]
 
-# Подготовка данных для отображения
 fig = go.Figure()
 
 if selected_class == "Spam":
-    # Данные для Spam
     class_data = X[y == 1]
     class_label = "Spam"
-    marker = 'circle'  # Символ для Spam
+    marker = 'circle' 
     color = 'red'
-    # Добавляем точки
     fig.add_trace(go.Scatter3d(
         x=class_data[features_to_plot[0]],
         y=class_data[features_to_plot[1]],
@@ -172,12 +169,11 @@ if selected_class == "Spam":
     ))
 
 elif selected_class == "Not Spam":
-    # Данные для Not Spam
     class_data = X[y == 0]
     class_label = "Not Spam"
-    marker = 'square'  # Символ для Not Spam
+    marker = 'square' 
     color = 'green'
-    # Добавляем точки
+    
     fig.add_trace(go.Scatter3d(
         x=class_data[features_to_plot[0]],
         y=class_data[features_to_plot[1]],
@@ -187,12 +183,10 @@ elif selected_class == "Not Spam":
         name=class_label
     ))
 
-else:  # Если выбрано "Both"
-    # Данные для обоих классов
+else:  
     spam_data = X[y == 1]
     not_spam_data = X[y == 0]
     
-    # Добавляем точки для Spam
     fig.add_trace(go.Scatter3d(
         x=spam_data[features_to_plot[0]],
         y=spam_data[features_to_plot[1]],
@@ -202,7 +196,6 @@ else:  # Если выбрано "Both"
         name="Spam"
     ))
 
-    # Добавляем точки для Not Spam
     fig.add_trace(go.Scatter3d(
         x=not_spam_data[features_to_plot[0]],
         y=not_spam_data[features_to_plot[1]],
@@ -212,7 +205,6 @@ else:  # Если выбрано "Both"
         name="Not Spam"
     ))
 
-# Настройки осей и заголовков
 fig.update_layout(
     scene=dict(
         xaxis_title=features_to_plot[0],
@@ -223,7 +215,6 @@ fig.update_layout(
     showlegend=True
 )
 
-# Отображаем график в Streamlit
 st.plotly_chart(fig)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
@@ -278,7 +269,6 @@ st.subheader('Decision Boundary')
 
 selected_model = st.selectbox("Select a model for decision boundary:", ["Logistic Regression", "Decision Tree", "KNN"])
 
-# Словарь для соответствия названий моделей объектам
 model_dict = {
     "Logistic Regression": log_reg_2,
     "Decision Tree": decision_tree_2,
@@ -288,14 +278,12 @@ model_dict = {
 if selected_model:
     model = model_dict[selected_model]
     
-    # Генерируем границы решений
     x_min, x_max = X_test_2_scaled[:, 0].min() - 1, X_test_2_scaled[:, 0].max() + 1
     y_min, y_max = X_test_2_scaled[:, 1].min() - 1, X_test_2_scaled[:, 1].max() + 1
     xx, yy = np.meshgrid(np.linspace(x_min, x_max, 100), np.linspace(y_min, y_max, 100))
     Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
     Z = Z.reshape(xx.shape)
     
-    # Создаем интерактивный график с Plotly
     fig = go.Figure(data=go.Heatmap(
         z=Z,
         x=np.linspace(x_min, x_max, Z.shape[1]),
@@ -304,7 +292,6 @@ if selected_model:
         opacity=0.5
     ))
     
-    # Добавляем точки тестовой выборки
     fig.add_trace(go.Scatter(
         x=X_test_2_scaled[:, 0], 
         y=X_test_2_scaled[:, 1], 
@@ -313,7 +300,6 @@ if selected_model:
         name="Test Data"
     ))
 
-    # Настройка осей
     fig.update_layout(
         title=f"{selected_model} Decision Boundary",
         xaxis_title=top_2_features[0],
