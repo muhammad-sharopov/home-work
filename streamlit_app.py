@@ -264,6 +264,21 @@ roc_auc_log_reg_test = roc_auc_score(y_test, y_prob_log_reg_test)
 roc_auc_dt_test = roc_auc_score(y_test, y_prob_dt_test)
 roc_auc_knn_test = roc_auc_score(y_test, y_prob_knn_test)
 
+X_train_scaled_2 = X_train_scaled[:, :2]
+X_test_scaled_2 = X_test_scaled[:, :2]
+
+log_reg_21 = LogisticRegression(max_iter=565)
+log_reg_21.fit(X_train_scaled_2, y_train)
+y_pred_log_reg_21 = log_reg_21.predict(X_train_scaled_2)
+
+decision_tree_21 = DecisionTreeClassifier(max_depth=5)
+decision_tree_21.fit(X_train_scaled_2, y_train)
+y_pred_dt_21 = decision_tree_21.predict(X_train_scaled_2)
+
+knn1 = KNeighborsClassifier(n_neighbors=5)
+knn1.fit(X_train_scaled_2, y_train)
+y_pred_knn1 = knn1.predict(X_train_scaled_2)
+
 data = {
     'Classifier': ['Logistic Regression', 'Decision Tree', 'KNN'],
     'AUC (train)': [roc_auc_log_reg_train, roc_auc_dt_train, roc_auc_knn_train],
@@ -279,12 +294,11 @@ st.subheader('Decision Boundary')
 selected_model = st.selectbox("Select a model for decision boundary:", ["Logistic Regression", "Decision Tree", "KNN"])
 
 model_dict = {
-    "Logistic Regression": log_reg_2,
-    "Decision Tree": decision_tree_2,
-    "KNN": knn
+    "Logistic Regression": log_reg_21,
+    "Decision Tree": decision_tree_21,
+    "KNN": knn1
 }
-X_train_scaled_2 = X_train_scaled[:, :2]
-X_test_scaled_2 = X_test_scaled[:, :2]
+
 
 
 if selected_model:
