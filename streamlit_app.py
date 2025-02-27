@@ -34,8 +34,15 @@ if "spam" not in column_names:
 
 data = pd.read_csv("spambase.data", delimiter=',', header=None, names=column_names)
 
-st.subheader("Sample Data")
-st.write(data.sample(10, random_state=42))
+with st.expander('Sample Data'):
+    st.write("Features (X)")
+    X_raw = data.drop('spam', axis=1)
+    st.dataframe(X_raw.sample(10, random_state=42))
+
+    st.write("Target (y)")
+    y_raw = data['spam']
+    st.dataframe(y_raw.sample(10, random_state=42))
+
 
 st.subheader("Unique Values and Shape")
 st.write("Number of unique values per column:")
