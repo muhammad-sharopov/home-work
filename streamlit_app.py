@@ -56,7 +56,10 @@ if selected_column:
     st.write(data[selected_column].unique()[:10]) 
 
 st.subheader("Data Description")
-st.write(data.describe())
+
+if st.button("Show Data Description"):
+    st.write(data.describe())
+
 
 data = data.dropna(subset=["spam"])
 
