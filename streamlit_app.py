@@ -93,9 +93,6 @@ selected_column = st.selectbox("Select a column to describe:", data.columns)
 
 st.write(data[selected_column].describe())
 
-
-
-
 data = data.dropna(subset=["spam"])
 
 unique_classes = data['spam'].unique()
@@ -152,18 +149,18 @@ X_top = data[features_to_plot]
 if selected_class == "Spam":
     class_data = X[y == 1]
     class_label = "Spam"
-    marker = 'o'
+    marker = 'circle'  # Используем разрешенный символ
     color = 'red'
 elif selected_class == "Not Spam":
     class_data = X[y == 0]
     class_label = "Not Spam"
-    marker = '^'
+    marker = 'square'  # Используем разрешенный символ
     color = 'green'
 else:  # Если выбрано "Both"
     class_data = X
     class_label = "Both"
-    marker = ['o', '^']
-    color = ['red', 'green']
+    marker = 'circle'  # Используем разрешенный символ
+    color = 'red'
 
 # Создаем 3D scatter plot с Plotly
 fig = go.Figure()
